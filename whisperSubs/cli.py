@@ -3,17 +3,19 @@ import whisper
 from whisper.tokenizer import LANGUAGES, TO_LANGUAGE_CODE
 import argparse
 import warnings
-import yt_dlp
+from moviepy.editor import VideoFileClip
+import sys
 from .utils import slugify, str2bool, write_srt, write_vtt
 import tempfile
+import ffmpeg
 
 
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("video", nargs="+", type=str,
-                        help="video URLs to transcribe")
-    parser.add_argument("--model", default="small",
+                        help="video file to transcribe")
+    parser.add_argument("--model", default="base",
                         choices=whisper.available_models(), help="name of the Whisper model to use")
     parser.add_argument("--format", default="vtt",
                         choices=["vtt", "srt"], help="the subtitle format to output")
@@ -63,27 +65,15 @@ def main():
             print("Saved SRT to", os.path.abspath(srt_path))
 
 
-def get_audio(urls):
+def get_audio(videoFile):
+    
     temp_dir = tempfile.gettempdir()
+    AudioPath = os.path.join(temp_dir, "audiofile.aac")
+    clip = VideoFileClip(videoFile)
+    clip.audio.write_audiofile(AudioPath)
+    
 
-    ydl = yt_dlp.YoutubeDL({
-        'quiet': True,
-        'verbose': False,
-        'format': 'bestaudio',
-        "outtmpl": os.path.join(temp_dir, "%(id)s.%(ext)s"),
-        'postprocessors': [{'preferredcodec': 'mp3', 'preferredquality': '192', 'key': 'FFmpegExtractAudio', }],
-    })
-
-    paths = {}
-
-    for url in urls:
-        result = ydl.extract_info(url, download=True)
-        print(
-            f"Downloaded video \"{result['title']}\". Generating subtitles..."
-        )
-        paths[result["title"]] = os.path.join(temp_dir, f"{result['id']}.mp3")
-
-    return paths
+    return AudioPath
 
 
 if __name__ == '__main__':

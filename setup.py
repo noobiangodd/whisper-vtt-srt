@@ -5,17 +5,16 @@ from setuptools import setup, find_packages
 
 setup(
     version="1.0",
-    name="yt_whisper",
+    name="whisper_vtt-srt",
     packages=find_packages(),
-    py_modules=["yt_whisper"],
-    author="Miguel Piedrafita",
+    py_modules=["whisper_vtt-srt"],
+    author="Maximiliano Lira Del Canto",
     install_requires=[
-        'yt-dlp',
         'whisper @ git+https://github.com/openai/whisper.git@main#egg=whisper'
     ],
-    description="Generate subtitles for YouTube videos using Whisper",
+    description="Generate subtitles for videos using Whisper",
     entry_points={
-        'console_scripts': ['yt_whisper=yt_whisper.cli:main'],
+        'console_scripts': ['whisperSubs=whisperSubs.cli:main'],
     },
     include_package_data=True,
 )

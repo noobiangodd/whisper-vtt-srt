@@ -1,4 +1,5 @@
-# Automatic Whisper subtitle generation
+# WhisperSubs
+Automatic Whisper subtitle generation
 
 This repository uses [OpenAI's Whisper](https://openai.com/blog/whisper) to generate subtitle files for any video.
 
