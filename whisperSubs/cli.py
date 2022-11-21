@@ -7,7 +7,6 @@ from moviepy.editor import VideoFileClip
 import sys
 from .utils import slugify, str2bool, write_srt, write_vtt
 import tempfile
-import ffmpeg
 
 
 def main():
@@ -42,33 +41,38 @@ def main():
             f"{model_name} is an English-only model, forcing English detection.")
         args["language"] = "en"
 
-    model = whisper.load_model(model_name)
-    audios = get_audio(args.pop("video"))
+    videoPath = args.pop("video")[0]
+    audio_path = get_audio(videoPath)
+    fileTitle = os.path.basename(videoPath)
     break_lines = args.pop("break_lines")
 
-    for title, audio_path in audios.items():
-        warnings.filterwarnings("ignore")
-        result = model.transcribe(audio_path, **args)
-        warnings.filterwarnings("default")
+    model = whisper.load_model(model_name)
 
-        if (subtitles_format == 'vtt'):
-            vtt_path = os.path.join(output_dir, f"{slugify(title)}.vtt")
-            with open(vtt_path, 'w', encoding="utf-8") as vtt:
-                write_vtt(result["segments"], file=vtt, line_length=break_lines)
 
-            print("Saved VTT to", os.path.abspath(vtt_path))
-        else:
-            srt_path = os.path.join(output_dir, f"{slugify(title)}.srt")
-            with open(srt_path, 'w', encoding="utf-8") as srt:
-                write_srt(result["segments"], file=srt, line_length=break_lines)
+    warnings.filterwarnings("ignore")
 
-            print("Saved SRT to", os.path.abspath(srt_path))
+    print (audio_path)
+    result = model.transcribe(audio_path, **args)
+    warnings.filterwarnings("default")
+
+    if (subtitles_format == 'vtt'):
+        vtt_path = os.path.join(output_dir, f"{slugify(fileTitle)}.vtt")
+        with open(vtt_path, 'w', encoding="utf-8") as vtt:
+            write_vtt(result["segments"], file=vtt, line_length=break_lines)
+
+        print("Saved VTT to", os.path.abspath(vtt_path))
+    else:
+        srt_path = os.path.join(output_dir, f"{slugify(fileTitle)}.srt")
+        with open(srt_path, 'w', encoding="utf-8") as srt:
+            write_srt(result["segments"], file=srt, line_length=break_lines)
+
+        print("Saved SRT to", os.path.abspath(srt_path))
 
 
 def get_audio(videoFile):
     
     temp_dir = tempfile.gettempdir()
-    AudioPath = os.path.join(temp_dir, "audiofile.aac")
+    AudioPath = os.path.join(temp_dir, os.path.basename(videoFile)+".mp3")
     clip = VideoFileClip(videoFile)
     clip.audio.write_audiofile(AudioPath)
     
