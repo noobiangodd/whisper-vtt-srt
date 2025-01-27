@@ -10,7 +10,7 @@ setup(
     py_modules=["whisper_vtt-srt"],
     author="Maximiliano Lira Del Canto",
     install_requires=[
-        'whisper @ git+https://github.com/openai/whisper.git@main#egg=whisper'
+        'whisper'
     ],
     description="Generate subtitles for videos using Whisper",
     entry_points={
